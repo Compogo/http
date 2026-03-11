@@ -18,7 +18,7 @@ var (
 	// HTTP request duration metrics middleware.
 	DurationComponent = &component.Component{
 		Init: component.StepFunc(func(container container.Container) error {
-			return container.Provide(NewRequestCount)
+			return container.Provide(NewDuration)
 		}),
 	}
 )
