@@ -44,10 +44,10 @@ var Component = &component.Component{
 			)
 		})
 	}),
-	PreRun: component.StepFunc(func(container container.Container) error {
+	Configuration: component.StepFunc(func(container container.Container) error {
 		return container.Invoke(Configuration)
 	}),
-	PostRun: component.StepFunc(func(container container.Container) error {
+	Execute: component.StepFunc(func(container container.Container) error {
 		return container.Invoke(func(r runner.Runner, server Server) error {
 			return r.RunTask(runner.NewTask("server.http", server))
 		})

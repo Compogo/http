@@ -102,3 +102,7 @@ func (param *Param) Middleware(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), param.name, value)))
 	})
 }
+
+func (param *Param) Name() string {
+	return param.name
+}

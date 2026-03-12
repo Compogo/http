@@ -25,7 +25,7 @@ var Component = &component.Component{
 			NewAuth,
 		)
 	}),
-	PreRun: component.StepFunc(func(container container.Container) error {
+	Configuration: component.StepFunc(func(container container.Container) error {
 		return container.Invoke(Configuration)
 	}),
 }
