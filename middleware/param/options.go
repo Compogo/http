@@ -27,7 +27,7 @@ func WithHeaderGetter() Option {
 	return func(param *Param) *Param {
 		param.getters = append(
 			param.getters, func(request *http.Request) string {
-				return request.URL.Query().Get(param.name)
+				return request.Header.Get(param.name)
 			},
 		)
 
