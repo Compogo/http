@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/Compogo/compogo/configurator"
-	"github.com/Compogo/compogo/types"
+	"github.com/Compogo/types/set"
 )
 
 const (
@@ -35,7 +35,7 @@ type Config struct {
 
 	tokens []string
 	// Set of allowed tokens for O(1) lookup
-	Tokens types.Set[string]
+	Tokens set.Set[string]
 }
 
 // NewConfig creates a new Config instance with default values.

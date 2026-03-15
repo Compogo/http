@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/Compogo/compogo/configurator"
-	"github.com/Compogo/compogo/types"
+	"github.com/Compogo/types/mapper"
 )
 
 const (
@@ -38,7 +38,7 @@ type Config struct {
 	FilePath string
 
 	creds []string
-	Creds types.Mapper[*Cred]
+	Creds mapper.Mapper[*Cred]
 }
 
 // NewConfig creates a new Config instance with default values.
