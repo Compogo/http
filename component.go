@@ -52,9 +52,4 @@ var Component = &component.Component{
 			return r.RunTask(runner.NewTask("server.http", server))
 		})
 	}),
-	Stop: component.StepFunc(func(container container.Container) error {
-		return container.Invoke(func(server Server) error {
-			return server.Close()
-		})
-	}),
 }

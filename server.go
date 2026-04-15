@@ -56,13 +56,24 @@ func (server *server) Close() error {
 	return server.server.Shutdown(ctx)
 }
 
-func (server *server) Process(ctx context.Context) (err error) {
+func (server *server) Process(ctx context.Context) error {
 	ctx, cancelFunc := context.WithCancel(ctx)
 	defer cancelFunc()
 
+	go func() {
+		<-ctx.Done()
+		if err := server.Close(); err != nil {
+			server.logger.Errorf("shutdown fail %s", err.Error())
+		}
+	}()
+
+	return server.ListenAndServe()
+}
+
+func (server *server) ListenAndServe() error {
 	server.logger.Infof("interface - %s, port - %d", server.config.Interface, server.config.Port)
 
-	if err = server.server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+	if err := server.server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		return fmt.Errorf("[http.server] serve failed: %w", err)
 	}
 
