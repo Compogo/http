@@ -47,7 +47,7 @@ var Component = &component.Component{
 	Configuration: component.StepFunc(func(container container.Container) error {
 		return container.Invoke(Configuration)
 	}),
-	Execute: component.StepFunc(func(container container.Container) error {
+	PreWait: component.StepFunc(func(container container.Container) error {
 		return container.Invoke(func(r runner.Runner, server Server) error {
 			return r.RunTask(runner.NewTask("server.http", server))
 		})
