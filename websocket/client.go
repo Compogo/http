@@ -34,6 +34,10 @@ func NewClient(conn *websocket.Conn, config *Config, onMessage emitter.Emitter[*
 }
 
 func (c *Client) Send(event *Event) error {
+	if event.Timestamp == nil {
+		event.Timestamp = NewTimestamp()
+	}
+
 	select {
 	case c.events <- event:
 		return nil

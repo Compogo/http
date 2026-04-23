@@ -47,6 +47,8 @@ func (h *Handler) Send(event *Event) (err error) {
 	h.rwm.RLock()
 	defer h.rwm.RUnlock()
 
+	event.Timestamp = NewTimestamp()
+
 	for client := range h.clients {
 		if err = client.Send(event); err != nil {
 			h.logger.Error(err)

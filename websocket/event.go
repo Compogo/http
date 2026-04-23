@@ -8,7 +8,6 @@ type Event struct {
 	Timestamp *Timestamp      `json:"timestamp,omitempty"`
 }
 
-type Timestamp struct {
-	Seconds int64 `json:"seconds,omitempty"`
-	Nanos   int64 `json:"nanos,omitempty"`
+func NewEvent(Type string, payload json.RawMessage) *Event {
+	return &Event{Type: Type, Payload: payload}
 }
