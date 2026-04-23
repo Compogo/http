@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"context"
 	"net/http"
 	"sync"
 
@@ -17,7 +18,9 @@ type Handler struct {
 	rwm     sync.RWMutex
 	clients set.Set[*Client]
 
-	OnMessage emitter.Emitter[*Event]
+	OnClientConnection    emitter.Emitter[*Client]
+	OnClientDisconnection emitter.Emitter[*Client]
+	OnMessage             emitter.Emitter[*Event]
 
 	logger logger.Logger
 	closer closer.Closer
@@ -30,11 +33,13 @@ func NewHandler(
 	closer closer.Closer,
 ) *Handler {
 	return &Handler{
-		config:    config,
-		upgrader:  upgrader,
-		OnMessage: emitter.NewEmitter[*Event](),
-		logger:    logger.GetLogger("websocket"),
-		closer:    closer,
+		config:                config,
+		upgrader:              upgrader,
+		OnClientConnection:    emitter.NewEmitter[*Client](),
+		OnClientDisconnection: emitter.NewEmitter[*Client](),
+		OnMessage:             emitter.NewEmitter[*Event](),
+		logger:                logger.GetLogger("websocket"),
+		closer:                closer,
 	}
 }
 
@@ -60,24 +65,28 @@ func (h *Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 
 	client := NewClient(conn, h.config, h.OnMessage, h.logger)
 
-	h.addClient(client)
-	defer h.removeClient(client)
+	ctx := request.Context()
 
-	if err := client.Process(request.Context()); err != nil {
+	h.addClient(ctx, client)
+	defer h.removeClient(ctx, client)
+
+	if err := client.Process(ctx); err != nil {
 		h.logger.Errorf("process failed: %s", err.Error())
 	}
 }
 
-func (h *Handler) addClient(client *Client) {
+func (h *Handler) addClient(ctx context.Context, client *Client) {
 	h.rwm.Lock()
 	defer h.rwm.Unlock()
+	defer h.OnClientConnection.Emit(ctx, client)
 
 	h.clients.Add(client)
 }
 
-func (h *Handler) removeClient(client *Client) {
+func (h *Handler) removeClient(ctx context.Context, client *Client) {
 	h.rwm.Lock()
 	defer h.rwm.Unlock()
+	defer h.OnClientDisconnection.Emit(ctx, client)
 
 	h.clients.Remove(client)
 }
