@@ -23,6 +23,7 @@ import (
 //	    myRouterComponent,  // must implement http.Router
 //	)
 var Component = &component.Component{
+	Name: "http.server",
 	Dependencies: component.Components{
 		runner.Component,
 	},
