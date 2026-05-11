@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 
 	"github.com/Compogo/compogo/logger"
@@ -15,10 +14,6 @@ import (
 // It integrates with runner.Runner for lifecycle management
 // and supports graceful shutdown via io.Closer.
 type Server interface {
-	// Closer io.Closer provides graceful shutdown functionality.
-	// It waits for active requests to complete up to ShutdownTimeout.
-	io.Closer
-
 	// Process runner.Process allows the server to be run as a task in the runner.
 	// The server will block until the context is canceled or an error occurs.
 	runner.Process
@@ -78,6 +73,10 @@ func (server *server) ListenAndServe() error {
 	}
 
 	return nil
+}
+
+func (server *server) Name() string {
+	return "server.http"
 }
 
 func (server *server) SetRouter(router Router) {

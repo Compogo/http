@@ -3,9 +3,9 @@ module github.com/Compogo/http
 go 1.26.1
 
 require (
-	github.com/Compogo/compogo v0.0.29
-	github.com/Compogo/runner v0.0.9
-	github.com/Compogo/types v0.0.13
+	github.com/Compogo/compogo v0.0.33
+	github.com/Compogo/runner v0.0.14
+	github.com/Compogo/types v0.0.15
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/go-http-utils/headers v0.0.0-20181008091004-fed159eddc2a
 	github.com/gorilla/websocket v1.5.3
@@ -25,5 +25,5 @@ require (
 	github.com/prometheus/procfs v0.16.1 // indirect
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
 	golang.org/x/sys v0.35.0 // indirect
-	google.golang.org/protobuf v1.36.8 // indirect
+	google.golang.org/protobuf v1.36.11 // indirect
 )
