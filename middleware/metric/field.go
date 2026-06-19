@@ -1,9 +1,9 @@
 package metric
 
 const (
-	// EndpointFieldName is the Prometheus label for the request endpoint.
+	// EndpointFieldName — имя поля для эндпоинта (URL-путь).
 	EndpointFieldName = "endpoint"
 
-	// CodeFieldName is the Prometheus label for the HTTP status code.
+	// CodeFieldName — имя поля для HTTP-кода ответа.
 	CodeFieldName = "code"
 )

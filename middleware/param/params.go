@@ -6,24 +6,24 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/Compogo/compogo/logger"
+	"github.com/Compogo/compogo"
 	"github.com/araddon/dateparse"
 	"github.com/spf13/cast"
 )
 
 const (
-	// HeaderRealIp is the standard header for real client IP when behind proxies.
+	// HeaderRealIp — заголовок с реальным IP клиента (nginx).
 	HeaderRealIp = "X-REAL-IP"
 
-	// HeaderForwardedFor is the standard header for forwarded client IPs.
+	// HeaderForwardedFor — заголовок с цепочкой IP (X-Forwarded-For).
 	HeaderForwardedFor = "X-FORWARDED-FOR"
 
-	// ipSeparator separates multiple IPs in X-Forwarded-For header.
+	// ipSeparator — разделитель IP-адресов в заголовке X-Forwarded-For.
 	ipSeparator = ","
 )
 
-// NewParamString creates a new string parameter.
-func NewParamString(name string, logger logger.Logger, options ...Option) *Param {
+// NewParamString создаёт параметр строкового типа.
+func NewParamString(name string, logger compogo.Logger, options ...Option) *Param {
 	return NewParam(
 		name,
 		logger,
@@ -32,8 +32,8 @@ func NewParamString(name string, logger logger.Logger, options ...Option) *Param
 	)
 }
 
-// NewParamInt creates a new int parameter.
-func NewParamInt(name string, logger logger.Logger, options ...Option) *Param {
+// NewParamInt создаёт параметр типа int.
+func NewParamInt(name string, logger compogo.Logger, options ...Option) *Param {
 	return NewParam(
 		name,
 		logger,
@@ -42,8 +42,8 @@ func NewParamInt(name string, logger logger.Logger, options ...Option) *Param {
 	)
 }
 
-// NewParamInt8 creates a new int8 parameter.
-func NewParamInt8(name string, logger logger.Logger, options ...Option) *Param {
+// NewParamInt8 создаёт параметр типа int8.
+func NewParamInt8(name string, logger compogo.Logger, options ...Option) *Param {
 	return NewParam(
 		name,
 		logger,
@@ -52,8 +52,8 @@ func NewParamInt8(name string, logger logger.Logger, options ...Option) *Param {
 	)
 }
 
-// NewParamInt16 creates a new int16 parameter.
-func NewParamInt16(name string, logger logger.Logger, options ...Option) *Param {
+// NewParamInt16 создаёт параметр типа int16.
+func NewParamInt16(name string, logger compogo.Logger, options ...Option) *Param {
 	return NewParam(
 		name,
 		logger,
@@ -62,8 +62,8 @@ func NewParamInt16(name string, logger logger.Logger, options ...Option) *Param 
 	)
 }
 
-// NewParamInt32 creates a new int32 parameter.
-func NewParamInt32(name string, logger logger.Logger, options ...Option) *Param {
+// NewParamInt32 создаёт параметр типа int32.
+func NewParamInt32(name string, logger compogo.Logger, options ...Option) *Param {
 	return NewParam(
 		name,
 		logger,
@@ -72,8 +72,8 @@ func NewParamInt32(name string, logger logger.Logger, options ...Option) *Param 
 	)
 }
 
-// NewParamInt64 creates a new int64 parameter.
-func NewParamInt64(name string, logger logger.Logger, options ...Option) *Param {
+// NewParamInt64 создаёт параметр типа int64.
+func NewParamInt64(name string, logger compogo.Logger, options ...Option) *Param {
 	return NewParam(
 		name,
 		logger,
@@ -82,8 +82,8 @@ func NewParamInt64(name string, logger logger.Logger, options ...Option) *Param 
 	)
 }
 
-// NewParamFloat32 creates a new float32 parameter.
-func NewParamFloat32(name string, logger logger.Logger, options ...Option) *Param {
+// NewParamFloat32 создаёт параметр типа float32.
+func NewParamFloat32(name string, logger compogo.Logger, options ...Option) *Param {
 	return NewParam(
 		name,
 		logger,
@@ -92,8 +92,8 @@ func NewParamFloat32(name string, logger logger.Logger, options ...Option) *Para
 	)
 }
 
-// NewParamFloat64 creates a new float64 parameter.
-func NewParamFloat64(name string, logger logger.Logger, options ...Option) *Param {
+// NewParamFloat64 создаёт параметр типа float64.
+func NewParamFloat64(name string, logger compogo.Logger, options ...Option) *Param {
 	return NewParam(
 		name,
 		logger,
@@ -102,8 +102,8 @@ func NewParamFloat64(name string, logger logger.Logger, options ...Option) *Para
 	)
 }
 
-// NewParamUint creates a new uint parameter.
-func NewParamUint(name string, logger logger.Logger, options ...Option) *Param {
+// NewParamUint создаёт параметр типа uint.
+func NewParamUint(name string, logger compogo.Logger, options ...Option) *Param {
 	return NewParam(
 		name,
 		logger,
@@ -112,8 +112,8 @@ func NewParamUint(name string, logger logger.Logger, options ...Option) *Param {
 	)
 }
 
-// NewParamUint8 creates a new uint8 parameter.
-func NewParamUint8(name string, logger logger.Logger, options ...Option) *Param {
+// NewParamUint8 создаёт параметр типа uint8.
+func NewParamUint8(name string, logger compogo.Logger, options ...Option) *Param {
 	return NewParam(
 		name,
 		logger,
@@ -122,8 +122,8 @@ func NewParamUint8(name string, logger logger.Logger, options ...Option) *Param 
 	)
 }
 
-// NewParamUint16 creates a new uint16 parameter.
-func NewParamUint16(name string, logger logger.Logger, options ...Option) *Param {
+// NewParamUint16 создаёт параметр типа uint16.
+func NewParamUint16(name string, logger compogo.Logger, options ...Option) *Param {
 	return NewParam(
 		name,
 		logger,
@@ -132,8 +132,8 @@ func NewParamUint16(name string, logger logger.Logger, options ...Option) *Param
 	)
 }
 
-// NewParamUint32 creates a new uint32 parameter.
-func NewParamUint32(name string, logger logger.Logger, options ...Option) *Param {
+// NewParamUint32 создаёт параметр типа uint32.
+func NewParamUint32(name string, logger compogo.Logger, options ...Option) *Param {
 	return NewParam(
 		name,
 		logger,
@@ -142,8 +142,8 @@ func NewParamUint32(name string, logger logger.Logger, options ...Option) *Param
 	)
 }
 
-// NewParamUint64 creates a new uint64 parameter.
-func NewParamUint64(name string, logger logger.Logger, options ...Option) *Param {
+// NewParamUint64 создаёт параметр типа uint64.
+func NewParamUint64(name string, logger compogo.Logger, options ...Option) *Param {
 	return NewParam(
 		name,
 		logger,
@@ -152,8 +152,8 @@ func NewParamUint64(name string, logger logger.Logger, options ...Option) *Param
 	)
 }
 
-// NewParamBool creates a new boolean parameter.
-func NewParamBool(name string, logger logger.Logger, options ...Option) *Param {
+// NewParamBool создаёт параметр типа bool.
+func NewParamBool(name string, logger compogo.Logger, options ...Option) *Param {
 	return NewParam(
 		name,
 		logger,
@@ -162,8 +162,8 @@ func NewParamBool(name string, logger logger.Logger, options ...Option) *Param {
 	)
 }
 
-// NewParamDuration creates a new time.Duration parameter.
-func NewParamDuration(name string, logger logger.Logger, options ...Option) *Param {
+// NewParamDuration создаёт параметр типа time.Duration.
+func NewParamDuration(name string, logger compogo.Logger, options ...Option) *Param {
 	return NewParam(
 		name,
 		logger,
@@ -172,9 +172,9 @@ func NewParamDuration(name string, logger logger.Logger, options ...Option) *Par
 	)
 }
 
-// NewParamTime creates a new time.Time parameter.
-// Supports flexible date parsing via github.com/araddon/dateparse.
-func NewParamTime(name string, logger logger.Logger, options ...Option) *Param {
+// NewParamTime создаёт параметр типа time.Time.
+// Поддерживает различные форматы дат (RFC3339, ISO8601, и т.д.).
+func NewParamTime(name string, logger compogo.Logger, options ...Option) *Param {
 	return NewParam(
 		name,
 		logger,
@@ -190,10 +190,14 @@ func NewParamTime(name string, logger logger.Logger, options ...Option) *Param {
 	)
 }
 
-// NewIp creates a parameter for extracting client IP addresses.
-// It checks X-REAL-IP, X-FORWARDED-FOR, and finally RemoteAddr.
-// Returns a net.IP value.
-func NewIp(name string, logger logger.Logger) *Param {
+// NewIp создаёт параметр для извлечения IP-адреса клиента.
+// Последовательно проверяет заголовки:
+//   - X-REAL-IP (nginx)
+//   - X-FORWARDED-FOR (proxy/load balancer)
+//   - RemoteAddr (прямое соединение)
+//
+// Возвращает net.IP.
+func NewIp(name string, logger compogo.Logger) *Param {
 	return NewParam(
 		name,
 		logger,
@@ -211,8 +215,8 @@ func NewIp(name string, logger logger.Logger) *Param {
 	)
 }
 
-// IpCaster converts a string to net.IP.
-// Handles comma-separated lists (X-Forwarded-For) and returns the first valid IP.
+// IpCaster преобразует строку в net.IP.
+// Поддерживает X-Forwarded-For с несколькими IP (берёт первый валидный).
 func IpCaster(value any) (any, error) {
 	val, err := cast.ToStringE(value)
 	if err != nil {

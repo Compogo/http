@@ -6,11 +6,17 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Compogo/compogo/logger"
+	"github.com/Compogo/compogo"
 	"github.com/Compogo/types/emitter"
 	"github.com/gorilla/websocket"
 )
 
+// Client представляет WebSocket-клиента (одно соединение).
+// Обеспечивает:
+//   - Двусторонний обмен сообщениями
+//   - Автоматические ping/pong для поддержания соединения
+//   - Буферизацию исходящих сообщений
+//   - Graceful shutdown через контекст
 type Client struct {
 	conn   *websocket.Conn
 	config *Config
@@ -19,10 +25,11 @@ type Client struct {
 	ticker *time.Ticker
 
 	onMessage emitter.Emitter[*Event]
-	logger    logger.Logger
+	logger    compogo.Logger
 }
 
-func NewClient(conn *websocket.Conn, config *Config, onMessage emitter.Emitter[*Event], logger logger.Logger) *Client {
+// NewClient создаёт нового WebSocket-клиента.
+func NewClient(conn *websocket.Conn, config *Config, onMessage emitter.Emitter[*Event], logger compogo.Logger) *Client {
 	return &Client{
 		conn:      conn,
 		config:    config,
@@ -33,6 +40,8 @@ func NewClient(conn *websocket.Conn, config *Config, onMessage emitter.Emitter[*
 	}
 }
 
+// Send отправляет событие клиенту.
+// Если буфер исходящих сообщений заполнен, возвращает MessageChanFullError.
 func (c *Client) Send(event *Event) error {
 	if event.Timestamp == nil {
 		event.Timestamp = NewTimestamp()
@@ -46,10 +55,14 @@ func (c *Client) Send(event *Event) error {
 	}
 }
 
+// Process запускает основной цикл обработки клиента.
+// Блокирует выполнение до завершения работы клиента.
+// Обрабатывает входящие и исходящие сообщения, ping/pong.
 func (c *Client) Process(ctx context.Context) error {
 	mainCtx, mainCancel := context.WithCancel(ctx)
-	defer mainCancel()
+	defer c.conn.Close()
 	defer close(c.events)
+	defer mainCancel()
 	defer c.ticker.Stop()
 
 	c.conn.SetPongHandler(func(string) error {
@@ -61,7 +74,6 @@ func (c *Client) Process(ctx context.Context) error {
 		readCtx, readCancel := context.WithCancel(mainCtx)
 		defer mainCancel()
 		defer readCancel()
-		defer c.conn.Close()
 
 		if err := c.conn.SetReadDeadline(time.Now().Add(c.config.PingTimeout)); err != nil {
 			c.logger.Errorf("websocket: failed to set read deadline: %s", err.Error())
@@ -102,7 +114,6 @@ func (c *Client) Process(ctx context.Context) error {
 		writeCtx, writeCancel := context.WithCancel(mainCtx)
 		defer mainCancel()
 		defer writeCancel()
-		defer c.conn.Close()
 
 		for {
 			select {
@@ -138,7 +149,6 @@ func (c *Client) Process(ctx context.Context) error {
 					return
 				}
 			case <-writeCtx.Done():
-				// app shutdown
 				return
 			}
 		}

@@ -7,13 +7,13 @@ import (
 	"github.com/spf13/cast"
 )
 
-// WithUriGetter adds a getter that extracts the parameter from URL query string.
-// Uses the parameter's name as the query key.
+// WithUriGetter добавляет getter для извлечения параметра из URL-query.
+// Использует имя параметра, заданное при создании Param.
 func WithUriGetter() Option {
 	return func(param *Param) *Param {
 		param.getters = append(
 			param.getters, func(request *http.Request) string {
-				return request.URL.Query().Get(param.name)
+				return request.URL.Query().Get(param.Name())
 			},
 		)
 
@@ -21,13 +21,13 @@ func WithUriGetter() Option {
 	}
 }
 
-// WithHeaderGetter adds a getter that extracts the parameter from HTTP headers.
-// Uses the parameter's name as the header key.
+// WithHeaderGetter добавляет getter для извлечения параметра из заголовка.
+// Использует имя параметра, заданное при создании Param.
 func WithHeaderGetter() Option {
 	return func(param *Param) *Param {
 		param.getters = append(
 			param.getters, func(request *http.Request) string {
-				return request.Header.Get(param.name)
+				return request.Header.Get(param.Name())
 			},
 		)
 
@@ -35,8 +35,8 @@ func WithHeaderGetter() Option {
 	}
 }
 
-// WithCookieGetter adds a getter that extracts the parameter from cookies.
-// Uses the parameter's name as the cookie name.
+// WithCookieGetter добавляет getter для извлечения параметра из cookie.
+// Использует имя параметра, заданное при создании Param.
 func WithCookieGetter() Option {
 	return func(param *Param) *Param {
 		param.getters = append(
@@ -55,21 +55,24 @@ func WithCookieGetter() Option {
 	}
 }
 
-// WithUriGetterByName adds a getter that extracts from URL query with a custom key.
+// WithUriGetterByName добавляет getter для извлечения параметра из URL-query
+// с указанием имени параметра (полезно, когда имя в запросе отличается от имени в контексте).
 func WithUriGetterByName(name string) Option {
 	return AddGetter(func(request *http.Request) string {
 		return request.URL.Query().Get(name)
 	})
 }
 
-// WithHeaderGetterByName adds a getter that extracts from headers with a custom key.
+// WithHeaderGetterByName добавляет getter для извлечения параметра из заголовка
+// с указанием имени параметра.
 func WithHeaderGetterByName(name string) Option {
 	return AddGetter(func(request *http.Request) string {
 		return request.Header.Get(name)
 	})
 }
 
-// WithCookieGetterByName adds a getter that extracts from cookies with a custom key.
+// WithCookieGetterByName добавляет getter для извлечения параметра из cookie
+// с указанием имени параметра.
 func WithCookieGetterByName(name string) Option {
 	return AddGetter(func(request *http.Request) string {
 		for _, cookie := range request.Cookies() {
@@ -82,7 +85,7 @@ func WithCookieGetterByName(name string) Option {
 	})
 }
 
-// AddGetter adds a custom getter function to the parameter.
+// AddGetter добавляет произвольный getter для извлечения параметра.
 func AddGetter(getter Getter) Option {
 	return func(param *Param) *Param {
 		param.getters = append(param.getters, getter)
@@ -91,7 +94,7 @@ func AddGetter(getter Getter) Option {
 	}
 }
 
-// AddValidator adds a custom validator function to the parameter.
+// AddValidator добавляет валидатор для проверки значения параметра.
 func AddValidator(validator Validator) Option {
 	return func(param *Param) *Param {
 		param.validators = append(param.validators, validator)
@@ -100,14 +103,15 @@ func AddValidator(validator Validator) Option {
 	}
 }
 
-// WithDefault sets a static default value for the parameter.
+// WithDefault устанавливает значение по умолчанию для параметра.
 func WithDefault(value any) Option {
 	return WithDefaultFunc(func() any {
 		return value
 	})
 }
 
-// WithDefaultFunc sets a dynamic default value provider for the parameter.
+// WithDefaultFunc устанавливает функцию для получения значения по умолчанию.
+// Функция вызывается каждый раз, когда параметр отсутствует в запросе.
 func WithDefaultFunc(defaultFunc DefaultValueFunc) Option {
 	return func(param *Param) *Param {
 		param.defaultValue = defaultFunc
@@ -116,7 +120,12 @@ func WithDefaultFunc(defaultFunc DefaultValueFunc) Option {
 	}
 }
 
-// GteValidator returns a validator that checks if a numeric value is >= the given threshold.
+// GteValidator создаёт валидатор, проверяющий что значение >= указанного.
+// Работает с числовыми типами (int, float, и т.д.).
+//
+// Пример:
+//
+//	param := NewParamInt("age", logger, AddValidator(GteValidator(18)))
 func GteValidator(val float64) Validator {
 	return func(value any) error {
 		rval, err := cast.ToFloat64E(value)

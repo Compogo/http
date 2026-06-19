@@ -1,17 +1,18 @@
 package websocket
 
 import (
-	"github.com/Compogo/compogo/component"
-	"github.com/Compogo/compogo/container"
+	"github.com/Compogo/compogo"
 	"github.com/Compogo/compogo/flag"
 )
 
-var Component = &component.Component{
+// Component — компонент WebSocket для Compogo.
+// Регистрирует конфигурацию и Upgrader в DI-контейнере.
+var Component = &compogo.Component{
 	Name: "http.server.websocket",
-	Init: component.StepFunc(func(container container.Container) error {
+	Init: compogo.StepFunc(func(container compogo.Container) error {
 		return container.Provides(NewConfig, NewUpgrader)
 	}),
-	BindFlags: component.BindFlags(func(flagSet flag.FlagSet, container container.Container) error {
+	BindFlags: compogo.BindFlags(func(flagSet flag.FlagSet, container compogo.Container) error {
 		return container.Invoke(func(config *Config) {
 			flagSet.IntVar(&config.ReadBufferSize, ReadBufferSizeFieldName, ReadBufferSizeDefault, "")
 			flagSet.IntVar(&config.WriteBufferSize, WriteBufferSizeFieldName, WriteBufferSizeDefault, "")
@@ -23,7 +24,7 @@ var Component = &component.Component{
 			flagSet.StringSliceVar(&config.origins, OriginsFieldName, nil, "")
 		})
 	}),
-	Configuration: component.StepFunc(func(container container.Container) error {
+	Configuration: compogo.StepFunc(func(container compogo.Container) error {
 		return container.Invoke(Configuration)
 	}),
 }

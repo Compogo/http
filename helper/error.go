@@ -10,36 +10,38 @@ import (
 	"github.com/thoas/go-funk"
 )
 
-const (
-	// MimeTypeNOSNIFF prevents browsers from MIME type sniffing
-	MimeTypeNOSNIFF = "nosniff"
-)
+// MimeTypeNOSNIFF — значение заголовка X-Content-Type-Options
+// для предотвращения MIME-сниффинга.
+const MimeTypeNOSNIFF = "nosniff"
 
-// Error represents a structured error response for JSON APIs.
-// It implements both error and fmt.Stringer interfaces.
+// Error — структура ошибки для JSON-ответов.
 type Error struct {
 	error string
 }
 
-// NewError creates a new Error with the given message.
+// NewError создаёт новую ошибку.
 func NewError(error string) *Error {
 	return &Error{error: error}
 }
 
-// Error returns the error message, implementing the error interface.
+// Error возвращает сообщение об ошибке.
+// Реализует интерфейс error.
 func (e *Error) Error() string {
 	return e.error
 }
 
-// MarshalJSON implements json.Marshaler for consistent JSON error format.
-// Produces: {"error":"message"}
+// MarshalJSON сериализует ошибку в JSON.
+// Формат: {"error": "сообщение"}
 func (e *Error) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf("{\"error\":\"%s\"}", e.Error())), nil
 }
 
-// JSONError writes a JSON-formatted error response.
-// It sets appropriate headers (Content-Type, X-Content-Type-Options)
-// and writes the error with the given status code.
+// JSONError отправляет ошибку в формате JSON.
+// Устанавливает заголовки Content-Type и X-Content-Type-Options.
+//
+// Пример:
+//
+//	helper.JSONError(w, helper.NewError("user not found"), http.StatusNotFound)
 func JSONError(w http.ResponseWriter, err *Error, code int) {
 	w.Header().Set(headers.ContentType, mimetype.ApplicationJSON)
 	w.Header().Set(headers.XContentTypeOptions, MimeTypeNOSNIFF)
@@ -47,9 +49,15 @@ func JSONError(w http.ResponseWriter, err *Error, code int) {
 	_ = json.NewEncoder(w).Encode(err)
 }
 
-// WriteError intelligently writes an error response based on the request's
-// Accept and Content-Type headers. If the client expects JSON, it responds
-// with JSONError; otherwise, it falls back to plain text via http.Error.
+// WriteError отправляет ошибку в формате JSON или plain text в зависимости
+// от заголовков Accept и Content-Type запроса.
+//
+// Если клиент ожидает JSON (application/json), отправляет JSON-ответ.
+// Иначе отправляет plain text через http.Error.
+//
+// Пример:
+//
+//	helper.WriteError(w, r, "user not found", http.StatusNotFound)
 func WriteError(w http.ResponseWriter, r *http.Request, err string, code int) {
 	acceptTypes, existAcceptTypes := r.Header[headers.Accept]
 	contentTypes, existContentTypes := r.Header[headers.ContentType]

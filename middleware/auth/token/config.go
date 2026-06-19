@@ -4,49 +4,45 @@ import (
 	"bufio"
 	"os"
 
-	"github.com/Compogo/compogo/configurator"
+	"github.com/Compogo/compogo"
 	"github.com/Compogo/types/set"
 )
 
 const (
-	// TokensFieldName is the command-line flag for inline tokens.
-	// Format: "token1,token2,token3"
+	// TokensFieldName — имя поля для списка токенов.
 	TokensFieldName = "server.http.auth.token.tokens"
 
-	// HeaderNameFieldName is the command-line flag for the header name.
+	// HeaderNameFieldName — имя поля для названия заголовка.
 	HeaderNameFieldName = "server.http.auth.token.header"
 
-	// FilePathFieldName is the command-line flag for tokens file.
-	// File should contain one token per line.
+	// FilePathFieldName — имя поля для пути к файлу с токенами.
 	FilePathFieldName = "server.http.auth.token.filepath"
-
-	// HeaderNameDefault is the default header name for token authentication.
-	HeaderNameDefault = "X-Auth-Token"
 )
 
-// Config holds the token authentication configuration.
-// It can be populated from command-line flags, config files, or a tokens file.
-type Config struct {
-	// HeaderName is the HTTP header to look for the token.
-	HeaderName string
+// HeaderNameDefault — имя заголовка по умолчанию (X-Auth-Token).
+var HeaderNameDefault = "X-Auth-Token"
 
-	// FilePath is the path to a file containing allowed tokens.
-	FilePath string
+// Config содержит конфигурацию Token Auth.
+type Config struct {
+	HeaderName string
+	FilePath   string
 
 	tokens []string
-	// Set of allowed tokens for O(1) lookup
 	Tokens set.Set[string]
 }
 
-// NewConfig creates a new Config instance with default values.
+// NewConfig создаёт новую конфигурацию.
 func NewConfig() *Config {
 	return &Config{}
 }
 
-// Configuration applies configuration values to the Config struct.
-// It reads from configurator and optionally from a tokens file.
-// Returns an error if file reading fails.
-func Configuration(config *Config, configurator configurator.Configurator) (*Config, error) {
+// Configuration загружает конфигурацию из Configurator.
+// Поддерживает загрузку токенов из:
+//   - Параметра tokens (срез строк)
+//   - Файла (построчное чтение, каждая строка = токен)
+//
+// Пустые строки в файле игнорируются.
+func Configuration(config *Config, configurator compogo.Configurator) (*Config, error) {
 	if config.HeaderName == "" || config.HeaderName == HeaderNameDefault {
 		configurator.SetDefault(HeaderNameFieldName, HeaderNameDefault)
 		config.HeaderName = configurator.GetString(HeaderNameFieldName)

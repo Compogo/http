@@ -5,12 +5,18 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/Compogo/compogo/closer"
-	"github.com/Compogo/compogo/logger"
+	"github.com/Compogo/compogo"
 	"github.com/Compogo/types/emitter"
 	"github.com/Compogo/types/set"
 )
 
+// Handler — HTTP-обработчик WebSocket-соединений.
+// Управляет всеми активными клиентами и обеспечивает:
+//   - Апгрейд HTTP до WebSocket
+//   - Управление клиентами (добавление/удаление)
+//   - Рассылку сообщений всем клиентам
+//   - События подключения/отключения клиентов
+//   - Эмиттер входящих сообщений
 type Handler struct {
 	config   *Config
 	upgrader *Upgrader
@@ -22,15 +28,16 @@ type Handler struct {
 	OnClientDisconnection emitter.Emitter[*Client]
 	OnMessage             emitter.Emitter[*Event]
 
-	logger logger.Logger
-	closer closer.Closer
+	logger compogo.Logger
+	closer compogo.Closer
 }
 
+// NewHandler создаёт новый WebSocket-обработчик.
 func NewHandler(
 	config *Config,
 	upgrader *Upgrader,
-	logger logger.Logger,
-	closer closer.Closer,
+	logger compogo.Logger,
+	closer compogo.Closer,
 ) *Handler {
 	return &Handler{
 		config:                config,
@@ -43,6 +50,8 @@ func NewHandler(
 	}
 }
 
+// Send отправляет событие всем подключённым клиентам.
+// Добавляет временную метку к событию.
 func (h *Handler) Send(event *Event) (err error) {
 	h.rwm.RLock()
 	defer h.rwm.RUnlock()
@@ -58,6 +67,8 @@ func (h *Handler) Send(event *Event) (err error) {
 	return nil
 }
 
+// ServeHTTP обрабатывает HTTP-запрос и апгрейдит его до WebSocket.
+// Реализует интерфейс http.Handler.
 func (h *Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	conn, err := h.upgrader.Upgrade(writer, request, nil)
 	if err != nil {

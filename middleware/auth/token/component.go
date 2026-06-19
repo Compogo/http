@@ -1,31 +1,19 @@
 package token
 
 import (
-	"github.com/Compogo/compogo/component"
-	"github.com/Compogo/compogo/container"
+	"github.com/Compogo/compogo"
 )
 
-// Component is a ready-to-use Compogo component that provides
-// HTTP Token Authentication middleware.
-//
-// Usage:
-//
-//	compogo.WithComponents(
-//	    http.Component,
-//	    token.Component,
-//	)
-//
-// Then in your router setup:
-//
-//	router.Use(tokenAuth.Middleware)
-var Component = &component.Component{
-	Init: component.StepFunc(func(container container.Container) error {
+// Component — компонент Token Auth для Compogo.
+// Регистрирует конфигурацию и middleware в DI-контейнере.
+var Component = compogo.Component{
+	Init: compogo.StepFunc(func(container compogo.Container) error {
 		return container.Provides(
 			NewConfig,
 			NewAuth,
 		)
 	}),
-	Configuration: component.StepFunc(func(container container.Container) error {
+	Configuration: compogo.StepFunc(func(container compogo.Container) error {
 		return container.Invoke(Configuration)
 	}),
 }

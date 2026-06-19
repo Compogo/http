@@ -1,22 +1,22 @@
-module github.com/Compogo/http
+module github.com/Compogo/http_server
 
 go 1.26.1
 
 require (
-	github.com/Compogo/compogo v0.0.33
-	github.com/Compogo/runner v0.0.14
-	github.com/Compogo/types v0.0.15
+	github.com/Compogo/compogo v1.0.0-rc1
+	github.com/Compogo/runner v1.0.2-rc1
+	github.com/Compogo/types v1.0.0
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/go-http-utils/headers v0.0.0-20181008091004-fed159eddc2a
 	github.com/gorilla/websocket v1.5.3
-	github.com/ldez/mimetype v0.7.0
+	github.com/ldez/mimetype v0.8.0
 	github.com/prometheus/client_golang v1.23.2
 	github.com/spf13/cast v1.10.0
 	github.com/thoas/go-funk v0.9.3
 )
 
 require (
-	github.com/Compogo/tools v0.0.1 // indirect
+	github.com/Compogo/tools v1.0.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect

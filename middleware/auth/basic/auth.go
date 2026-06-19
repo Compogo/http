@@ -3,24 +3,23 @@ package basic
 import (
 	"net/http"
 
-	"github.com/Compogo/http/helper"
+	"github.com/Compogo/http_server/helper"
 )
 
-// Auth implements HTTP Basic Authentication middleware.
-// It validates incoming requests against configured credentials.
+// Auth реализует HTTP Basic Authentication middleware.
+// Проверяет учетные данные из заголовка Authorization.
 type Auth struct {
 	config *Config
 }
 
-// NewAuth creates a new Auth middleware instance with the given configuration.
+// NewAuth создаёт новый middleware для Basic Auth.
 func NewAuth(config *Config) *Auth {
 	return &Auth{config: config}
 }
 
-// Middleware implements the http.Middleware interface.
-// It checks for valid Basic Authentication credentials:
-//   - If no credentials or invalid credentials, returns 401 Unauthorized
-//   - If valid, passes the request to the next handler
+// Middleware реализует интерфейс http_server.Middleware.
+// Проверяет логин и пароль из заголовка Authorization.
+// В случае неудачи возвращает 401 Unauthorized.
 func (auth *Auth) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		userName, password, ok := request.BasicAuth()

@@ -1,39 +1,25 @@
-package http
+package http_server
 
 import (
-	"github.com/Compogo/compogo/component"
-	"github.com/Compogo/compogo/container"
+	"github.com/Compogo/compogo"
 	"github.com/Compogo/compogo/flag"
 	"github.com/Compogo/runner"
 )
 
-// Component is a ready-to-use Compogo component that provides an HTTP server.
-// It automatically:
-//   - Registers Config and Server in the DI container
-//   - Adds command-line flags for server configuration
-//   - Configures the server during PreRun phase
-//   - Starts the server as a runner task during PostRun phase
-//   - Performs graceful shutdown during Stop phase
-//
-// Usage:
-//
-//	compogo.WithComponents(
-//	    runner.Component,
-//	    http.Component,
-//	    myRouterComponent,  // must implement http.Router
-//	)
-var Component = &component.Component{
+// Component — компонент HTTP-сервера для Compogo.
+// Регистрирует сервер в DI-контейнере и запускает его через Runner.
+var Component = compogo.Component{
 	Name: "http.server",
-	Dependencies: component.Components{
-		runner.Component,
+	Dependencies: compogo.Components{
+		&runner.Component,
 	},
-	Init: component.StepFunc(func(container container.Container) error {
+	Init: compogo.StepFunc(func(container compogo.Container) error {
 		return container.Provides(
 			NewConfig,
 			NewServer,
 		)
 	}),
-	BindFlags: component.BindFlags(func(flagSet flag.FlagSet, container container.Container) error {
+	BindFlags: compogo.BindFlags(func(flagSet flag.FlagSet, container compogo.Container) error {
 		return container.Invoke(func(config *Config) {
 			flagSet.StringVar(&config.Interface, InterfaceFieldName, InterfaceDefault, "interface for listening to incoming requests")
 			flagSet.Uint16Var(&config.Port, PortFieldName, PortDefault, "port for listening to incoming requests")
@@ -45,10 +31,10 @@ var Component = &component.Component{
 			)
 		})
 	}),
-	Configuration: component.StepFunc(func(container container.Container) error {
+	Configuration: compogo.StepFunc(func(container compogo.Container) error {
 		return container.Invoke(Configuration)
 	}),
-	PreWait: component.StepFunc(func(container container.Container) error {
+	PreWait: compogo.StepFunc(func(container compogo.Container) error {
 		return container.Invoke(func(r runner.Runner, server Server) error {
 			return r.RunProcess(server)
 		})

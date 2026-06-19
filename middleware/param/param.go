@@ -6,29 +6,41 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/Compogo/compogo/logger"
-	"github.com/Compogo/http/helper"
+	"github.com/Compogo/compogo"
+	"github.com/Compogo/http_server/helper"
 )
 
-// Option configures a Param during creation.
+// Option — функция настройки параметра.
 type Option func(param *Param) *Param
 
-// Caster converts a raw string value to the desired type.
-// Returns the converted value or an error.
+// Caster — функция преобразования строкового значения в целевой тип.
 type Caster func(any) (any, error)
 
-// Getter extracts a string value from an HTTP request.
+// Getter — функция извлечения строкового значения из HTTP-запроса.
 type Getter func(request *http.Request) string
 
-// Validator validates a typed value.
-// Returns an error if validation fails.
+// Validator — функция проверки корректности значения.
 type Validator func(any) error
 
-// DefaultValueFunc provides a default value when none is found in the request.
+// DefaultValueFunc — функция для получения значения по умолчанию.
 type DefaultValueFunc func() any
 
-// Param defines a request parameter with extraction, casting, and validation rules.
-// It implements http.Middleware, injecting the parsed value into the request context.
+// Param — middleware для извлечения, приведения и валидации параметров из HTTP-запроса.
+//
+// Поддерживает:
+//   - Извлечение из URL-query, заголовков, cookies
+//   - Приведение к различным типам (string, int, float, bool, time, duration, ip)
+//   - Валидацию значений
+//   - Значения по умолчанию
+//   - Сохранение в контексте запроса
+//
+// Пример:
+//
+//	userIdParam := NewParamInt("user_id", logger,
+//	    WithUriGetter(),
+//	    AddValidator(GteValidator(1)),
+//	)
+//	router.Get("/users/:id", userIdParam.Middleware(http.HandlerFunc(handler)))
 type Param struct {
 	name string
 
@@ -37,15 +49,15 @@ type Param struct {
 	getters      []Getter
 	validators   []Validator
 
-	logger logger.Logger
+	logger compogo.Logger
 }
 
-// NewParam creates a new Param with the given name, logger, caster, and options.
-// The parameter value will be stored in the request context under the parameter name.
-func NewParam(name string, logger logger.Logger, caster Caster, options ...Option) *Param {
+// NewParam создаёт новый параметр с указанными опциями.
+// Принимает имя, логгер, функцию приведения и опции.
+func NewParam(name string, logger compogo.Logger, caster Caster, options ...Option) *Param {
 	param := &Param{
 		name:   name,
-		logger: logger.GetLogger("http.server.param." + name),
+		logger: logger.GetLogger("http").GetLogger("server").GetLogger("param").GetLogger(name),
 		caster: caster,
 	}
 
@@ -56,9 +68,9 @@ func NewParam(name string, logger logger.Logger, caster Caster, options ...Optio
 	return param
 }
 
-// Middleware implements http.Middleware.
-// It extracts, casts, validates the parameter and injects it into the request context.
-// If any step fails, it returns an appropriate HTTP error response.
+// Middleware реализует интерфейс http_server.Middleware.
+// Извлекает параметр, приводит к целевому типу, валидирует и сохраняет в контекст.
+// В случае ошибки возвращает 400 Bad Request.
 func (param *Param) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var requestValue string
@@ -103,6 +115,7 @@ func (param *Param) Middleware(next http.Handler) http.Handler {
 	})
 }
 
+// Name возвращает имя параметра.
 func (param *Param) Name() string {
 	return param.name
 }

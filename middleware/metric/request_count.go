@@ -9,26 +9,25 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
-// responseStatusCode wraps http.ResponseWriter to capture the status code.
+// responseStatusCode — обёртка над http.ResponseWriter для захвата HTTP-кода ответа.
 type responseStatusCode struct {
 	http.ResponseWriter
 	statusCode int
 }
 
-// WriteHeader captures the status code before delegating.
 func (writer *responseStatusCode) WriteHeader(code int) {
 	writer.statusCode = code
 	writer.ResponseWriter.WriteHeader(code)
 }
 
-// RequestCount is middleware that counts HTTP requests by status code and endpoint.
-// It exports a counter metric: compogo_http_server_requests_total{app, code, endpoint}
+// RequestCount — middleware для сбора метрики количества HTTP-запросов.
+// Считает количество запросов с разбивкой по эндпоинтам и кодам ответа.
+//
+// Метрика: compogo_http_server_requests_total{app="myapp", code="200", endpoint="/api/v1/users"}
 type RequestCount struct {
 	counter *prometheus.CounterVec
 }
 
-// NewRequestCount creates a new RequestCount middleware.
-// The appConfig provides the application name for the metric label.
 func NewRequestCount(appConfig *compogo.Config) *RequestCount {
 	return &RequestCount{
 		counter: promauto.NewCounterVec(prometheus.CounterOpts{
@@ -41,8 +40,6 @@ func NewRequestCount(appConfig *compogo.Config) *RequestCount {
 	}
 }
 
-// Middleware implements the http.Middleware interface.
-// It increments the counter after the request completes.
 func (middleware *RequestCount) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		loggingResponseWriter := &responseStatusCode{ResponseWriter: w, statusCode: http.StatusOK}

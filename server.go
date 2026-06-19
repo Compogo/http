@@ -1,4 +1,4 @@
-package http
+package http_server
 
 import (
 	"context"
@@ -6,33 +6,31 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/Compogo/compogo/logger"
+	"github.com/Compogo/compogo"
 	"github.com/Compogo/runner"
 )
 
-// Server defines the interface for an HTTP server component.
-// It integrates with runner.Runner for lifecycle management
-// and supports graceful shutdown via io.Closer.
+// Server представляет HTTP-сервер с поддержкой graceful shutdown.
+// Реализует интерфейс runner.Process для интеграции с Runner'ом.
 type Server interface {
-	// Process runner.Process allows the server to be run as a task in the runner.
-	// The server will block until the context is canceled or an error occurs.
 	runner.Process
-
-	// SetRouter attaches a Router to the server.
-	// Must be called before starting the server.
 	SetRouter(router Router)
 }
 
 type server struct {
 	config *Config
 	server *http.Server
-	logger logger.Logger
+	logger compogo.Logger
 }
 
-// NewServer creates a new HTTP server instance with the given configuration.
-// The server is not started until it's passed to runner.Runner.
-// The logger is automatically namespaced with "server.http" for better log filtering.
-func NewServer(config *Config, logger logger.Logger) Server {
+// NewServer создаёт новый HTTP-сервер.
+// Принимает конфигурацию и логгер.
+//
+// Пример:
+//
+//	server := NewServer(config, logger)
+//	server.SetRouter(router)
+func NewServer(config *Config, logger compogo.Logger) Server {
 	return &server{
 		config: config,
 		logger: logger.GetLogger("server.http"),
@@ -42,6 +40,9 @@ func NewServer(config *Config, logger logger.Logger) Server {
 	}
 }
 
+// Close останавливает HTTP-сервер с таймаутом.
+// Реализует интерфейс io.Closer.
+// Использует ShutdownTimeout из конфигурации.
 func (server *server) Close() error {
 	ctx, cancelFunc := context.WithTimeout(context.Background(), server.config.ShutdownTimeout)
 	defer cancelFunc()
@@ -51,20 +52,14 @@ func (server *server) Close() error {
 	return server.server.Shutdown(ctx)
 }
 
-func (server *server) Process(ctx context.Context) error {
-	ctx, cancelFunc := context.WithCancel(ctx)
-	defer cancelFunc()
-
-	go func() {
-		<-ctx.Done()
-		if err := server.Close(); err != nil {
-			server.logger.Errorf("shutdown fail %s", err.Error())
-		}
-	}()
-
+// Process запускает HTTP-сервер.
+// Реализует интерфейс runner.Process.
+func (server *server) Process(_ context.Context) error {
 	return server.ListenAndServe()
 }
 
+// ListenAndServe запускает HTTP-сервер и обрабатывает ошибки.
+// Игнорирует http.ErrServerClosed (штатное завершение).
 func (server *server) ListenAndServe() error {
 	server.logger.Infof("interface - %s, port - %d", server.config.Interface, server.config.Port)
 

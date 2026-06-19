@@ -8,11 +8,13 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+// Upgrader — обёртка над websocket.Upgrader с поддержкой проверки Origin
 type Upgrader struct {
 	*websocket.Upgrader
 	config *Config
 }
 
+// NewUpgrader создаёт новый Upgrader с конфигурацией из Config.
 func NewUpgrader(config *Config) *Upgrader {
 	up := &Upgrader{
 		Upgrader: &websocket.Upgrader{
@@ -27,6 +29,13 @@ func NewUpgrader(config *Config) *Upgrader {
 	return up
 }
 
+// CheckOrigin проверяет, разрешён ли Origin запроса.
+// Поддерживает:
+//   - Wildcard "*" — разрешены все origins
+//   - Совпадение с хостом запроса (same-origin)
+//   - Список разрешённых origins из конфигурации
+//
+// Реализует интерфейс websocket.Upgrader.CheckOrigin.
 func (up *Upgrader) CheckOrigin(r *http.Request) bool {
 	if up.config.Origins.Contains(AnyOrigin) {
 		return true

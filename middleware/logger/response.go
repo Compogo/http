@@ -3,38 +3,34 @@ package logger
 import (
 	"net/http"
 
-	"github.com/Compogo/compogo/logger"
+	"github.com/Compogo/compogo"
 )
 
-// response wraps http.ResponseWriter to capture the response body for logging.
+// response — обёртка над http.ResponseWriter для захвата тела ответа.
 type response struct {
 	http.ResponseWriter
 
 	body []byte
 }
 
-// Write captures the written data while delegating to the underlying ResponseWriter.
 func (response *response) Write(body []byte) (int, error) {
 	response.body = append(response.body, body...)
 
 	return response.ResponseWriter.Write(body)
 }
 
-// Response is middleware that logs HTTP response bodies at DEBUG level.
-// Useful for debugging API responses in development environments.
+// Response — middleware для логирования исходящих HTTP-ответов.
+// Логирует тело ответа.
 type Response struct {
-	logger logger.Logger
+	logger compogo.Logger
 }
 
-// NewResponse creates a new Response logging middleware.
-func NewResponse(logger logger.Logger) *Response {
+func NewResponse(logger compogo.Logger) *Response {
 	return &Response{
-		logger: logger.GetLogger("http.server.middleware.response"),
+		logger: logger.GetLogger("http").GetLogger("server").GetLogger("middleware").GetLogger("response"),
 	}
 }
 
-// Middleware implements the http.Middleware interface.
-// It captures the response body and logs it after the handler completes.
 func (r *Response) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		responseWriter := &response{ResponseWriter: writer}

@@ -1,32 +1,48 @@
-package http
+package http_server
 
 import (
 	"time"
 
-	"github.com/Compogo/compogo/configurator"
+	"github.com/Compogo/compogo"
 )
 
 const (
-	InterfaceFieldName       = "server.http.interface"
-	PortFieldName            = "server.http.port"
-	ShutdownTimeoutFieldName = "server.http.timeout.shutdown"
+	// InterfaceFieldName — имя поля для сетевого интерфейса.
+	InterfaceFieldName = "server.http.interface"
 
-	InterfaceDefault       = "0.0.0.0"
-	PortDefault            = uint16(8080)
+	// PortFieldName — имя поля для порта.
+	PortFieldName = "server.http.port"
+
+	// ShutdownTimeoutFieldName — имя поля для таймаута завершения.
+	ShutdownTimeoutFieldName = "server.http.timeout.shutdown"
+)
+
+var (
+	// InterfaceDefault — сетевой интерфейс по умолчанию (все интерфейсы).
+	InterfaceDefault = "0.0.0.0"
+
+	// PortDefault — порт по умолчанию.
+	PortDefault = uint16(8080)
+
+	// ShutdownTimeoutDefault — таймаут завершения по умолчанию (30 секунд).
 	ShutdownTimeoutDefault = 30 * time.Second
 )
 
+// Config содержит конфигурацию HTTP-сервера.
 type Config struct {
 	Interface       string
 	Port            uint16
 	ShutdownTimeout time.Duration
 }
 
+// NewConfig создаёт новую конфигурацию.
 func NewConfig() *Config {
 	return &Config{}
 }
 
-func Configuration(config *Config, configurator configurator.Configurator) *Config {
+// Configuration загружает конфигурацию из Configurator.
+// Если значения не заданы, устанавливаются значения по умолчанию.
+func Configuration(config *Config, configurator compogo.Configurator) *Config {
 	if config.Interface == "" || config.Interface == InterfaceDefault {
 		configurator.SetDefault(InterfaceFieldName, InterfaceDefault)
 		config.Interface = configurator.GetString(InterfaceFieldName)

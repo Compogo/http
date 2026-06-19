@@ -6,26 +6,22 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/Compogo/compogo/logger"
-	"github.com/Compogo/http/helper"
+	"github.com/Compogo/compogo"
+	"github.com/Compogo/http_server/helper"
 )
 
-// Request is middleware that logs HTTP request bodies at DEBUG level.
-// It reads the entire body, logs it, and restores it for the next handler.
+// Request — middleware для логирования входящих HTTP-запросов.
+// Логирует путь и тело запроса.
 type Request struct {
-	logger logger.Logger
+	logger compogo.Logger
 }
 
-// NewRequest creates a new Request logging middleware.
-func NewRequest(logger logger.Logger) *Request {
+func NewRequest(logger compogo.Logger) *Request {
 	return &Request{
-		logger: logger.GetLogger("http.server.middleware.request"),
+		logger: logger.GetLogger("http").GetLogger("server").GetLogger("middleware").GetLogger("request"),
 	}
 }
 
-// Middleware implements the http.Middleware interface.
-// It reads the request body, logs it, and restores it for subsequent handlers.
-// If body reading fails, it returns 400 Bad Request.
 func (r *Request) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		body, err := io.ReadAll(request.Body)

@@ -1,23 +1,22 @@
 package metric
 
 import (
-	"github.com/Compogo/compogo/component"
-	"github.com/Compogo/compogo/container"
+	"github.com/Compogo/compogo"
 )
 
 var (
-	// RequestCountComponent is a Compogo component that provides
-	// HTTP request count metrics middleware.
-	RequestCountComponent = &component.Component{
-		Init: component.StepFunc(func(container container.Container) error {
+	// RequestCountComponent — компонент для сбора метрики количества запросов.
+	// Считает количество HTTP-запросов с разбивкой по эндпоинтам и кодам ответа.
+	RequestCountComponent = &compogo.Component{
+		Init: compogo.StepFunc(func(container compogo.Container) error {
 			return container.Provide(NewRequestCount)
 		}),
 	}
 
-	// DurationComponent is a Compogo component that provides
-	// HTTP request duration metrics middleware.
-	DurationComponent = &component.Component{
-		Init: component.StepFunc(func(container container.Container) error {
+	// DurationComponent — компонент для сбора метрики длительности запросов.
+	// Измеряет время выполнения HTTP-запросов с разбивкой по эндпоинтам.
+	DurationComponent = &compogo.Component{
+		Init: compogo.StepFunc(func(container compogo.Container) error {
 			return container.Provide(NewDuration)
 		}),
 	}

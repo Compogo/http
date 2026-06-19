@@ -1,21 +1,22 @@
 package logger
 
 import (
-	"github.com/Compogo/compogo/component"
-	"github.com/Compogo/compogo/container"
+	"github.com/Compogo/compogo"
 )
 
 var (
-	// RequestComponent is a Compogo component that provides request logging middleware.
-	RequestComponent = &component.Component{
-		Init: component.StepFunc(func(container container.Container) error {
+	// RequestComponent — компонент middleware логирования запросов для Compogo.
+	// Регистрирует Request в DI-контейнере.
+	RequestComponent = compogo.Component{
+		Init: compogo.StepFunc(func(container compogo.Container) error {
 			return container.Provide(NewRequest)
 		}),
 	}
 
-	// ResponseComponent is a Compogo component that provides response logging middleware.
-	ResponseComponent = &component.Component{
-		Init: component.StepFunc(func(container container.Container) error {
+	// ResponseComponent — компонент middleware логирования ответов для Compogo.
+	// Регистрирует Response в DI-контейнере.
+	ResponseComponent = compogo.Component{
+		Init: compogo.StepFunc(func(container compogo.Container) error {
 			return container.Provide(NewResponse)
 		}),
 	}

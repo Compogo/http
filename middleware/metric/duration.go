@@ -8,14 +8,14 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
-// Duration is middleware that measures HTTP request duration.
-// It exports a histogram metric: compogo_http_server_duration_seconds{app, endpoint}
+// Duration — middleware для сбора метрики длительности HTTP-запросов.
+// Измеряет время выполнения каждого запроса в секундах.
+//
+// Метрика: compogo_http_server_duration_seconds{app="myapp", endpoint="/api/v1/users"}
 type Duration struct {
 	counter *prometheus.HistogramVec
 }
 
-// NewDuration creates a new Duration middleware.
-// The appConfig provides the application name for the metric label.
 func NewDuration(appConfig *compogo.Config) *Duration {
 	return &Duration{
 		counter: promauto.NewHistogramVec(prometheus.HistogramOpts{
@@ -28,8 +28,6 @@ func NewDuration(appConfig *compogo.Config) *Duration {
 	}
 }
 
-// Middleware implements the http.Middleware interface.
-// It measures the duration of the request and records it in the histogram.
 func (middleware *Duration) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		timer := prometheus.NewTimer(middleware.counter.With(prometheus.Labels{

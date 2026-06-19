@@ -1,31 +1,19 @@
 package basic
 
 import (
-	"github.com/Compogo/compogo/component"
-	"github.com/Compogo/compogo/container"
+	"github.com/Compogo/compogo"
 )
 
-// Component is a ready-to-use Compogo component that provides
-// HTTP Basic Authentication middleware.
-//
-// Usage:
-//
-//	compogo.WithComponents(
-//	    http.Component,
-//	    basic.Component,
-//	)
-//
-// Then in your router setup:
-//
-//	router.Use(basicAuth.Middleware)
-var Component = &component.Component{
-	Init: component.StepFunc(func(container container.Container) error {
+// Component — компонент Basic Auth для Compogo.
+// Регистрирует конфигурацию и middleware в DI-контейнере.
+var Component = compogo.Component{
+	Init: compogo.StepFunc(func(container compogo.Container) error {
 		return container.Provides(
 			NewConfig,
 			NewAuth,
 		)
 	}),
-	Configuration: component.StepFunc(func(container container.Container) error {
+	Configuration: compogo.StepFunc(func(container compogo.Container) error {
 		return container.Invoke(Configuration)
 	}),
 }

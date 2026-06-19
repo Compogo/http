@@ -5,35 +5,35 @@ import (
 	"os"
 	"strings"
 
-	"github.com/Compogo/compogo/configurator"
+	"github.com/Compogo/compogo"
 	"github.com/Compogo/types/mapper"
 )
 
 const (
-	// CredsFieldName is the command-line flag for inline credentials.
-	// Format: "username1:password1,username2:password2"
+	// CredsFieldName — имя поля для списка учетных данных (логин:пароль).
 	CredsFieldName = "server.http.auth.basic.creds"
 
-	// FilePathFieldName is the command-line flag for credentials file.
-	// File should contain one "username:password" per line.
+	// FilePathFieldName — имя поля для пути к файлу с учетными данными.
 	FilePathFieldName = "server.http.auth.basic.filepath"
 
+	// pairsSeparator — разделитель между логином и паролем.
 	pairsSeparator = ":"
 )
 
-// Cred represents a single username/password pair for basic authentication.
+// Cred представляет учетные данные пользователя.
+// Реализует fmt.Stringer для использования в mapper.
 type Cred struct {
 	UserName string
 	Password string
 }
 
-// String returns the username, implementing fmt.Stringer.
+// String возвращает имя пользователя.
+// Реализует интерфейс fmt.Stringer для mapper.
 func (c *Cred) String() string {
 	return c.UserName
 }
 
-// Config holds the basic authentication configuration.
-// It can be populated from command-line flags, config files, or a credentials file.
+// Config содержит конфигурацию Basic Auth.
 type Config struct {
 	FilePath string
 
@@ -41,15 +41,18 @@ type Config struct {
 	Creds mapper.Mapper[*Cred]
 }
 
-// NewConfig creates a new Config instance with default values.
+// NewConfig создаёт новую конфигурацию.
 func NewConfig() *Config {
 	return &Config{}
 }
 
-// Configuration applies configuration values to the Config struct.
-// It reads from configurator and optionally from a credentials file.
-// Returns an error if file reading fails.
-func Configuration(config *Config, configurator configurator.Configurator) (*Config, error) {
+// Configuration загружает конфигурацию из Configurator.
+// Поддерживает загрузку учетных данных из:
+//   - Параметра creds (срез строк "логин:пароль")
+//   - Файла (построчное чтение, каждая строка = "логин:пароль")
+//
+// Пустые строки в файле игнорируются.
+func Configuration(config *Config, configurator compogo.Configurator) (*Config, error) {
 	if len(config.creds) == 0 {
 		config.creds = configurator.GetStringSlice(CredsFieldName)
 	}
