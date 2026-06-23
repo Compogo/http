@@ -7,7 +7,7 @@ import (
 
 // Component — компонент WebSocket для Compogo.
 // Регистрирует конфигурацию и Upgrader в DI-контейнере.
-var Component = &compogo.Component{
+var Component = compogo.Component{
 	Name: "http.server.websocket",
 	Init: compogo.StepFunc(func(container compogo.Container) error {
 		return container.Provides(NewConfig, NewUpgrader)
